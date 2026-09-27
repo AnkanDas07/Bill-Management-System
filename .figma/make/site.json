@@ -1,0 +1,10 @@
+{
+  "description": "Effortlessly manage bills and customers with this intuitive platform designed for small businesses, streamlining financial tracking and invoicing.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
