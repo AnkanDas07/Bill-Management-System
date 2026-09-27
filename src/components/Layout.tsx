@@ -14,7 +14,7 @@ export default function Layout({ currentPage, onNavigate, onLogout, children }: 
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="flex h-screen bg-[#f4f7f9] overflow-hidden">
       <div className="hidden lg:flex w-60 flex-col flex-shrink-0 shadow-sm">
         <Sidebar currentPage={currentPage} onNavigate={onNavigate} onLogout={onLogout} />
       </div>
@@ -37,7 +37,7 @@ export default function Layout({ currentPage, onNavigate, onLogout, children }: 
       )}
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-slate-200 flex-shrink-0">
+        <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-[#dfe7ee] flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="text-slate-600 hover:text-slate-900 transition-colors"
@@ -45,7 +45,7 @@ export default function Layout({ currentPage, onNavigate, onLogout, children }: 
             <Menu size={22} />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-blue-500 rounded-md flex items-center justify-center">
+            <div className="w-6 h-6 bg-[#2f6f7b] rounded-md flex items-center justify-center">
               <Zap size={12} className="text-white" />
             </div>
             <span className="font-semibold text-slate-900">BillFlow</span>

@@ -26,7 +26,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 const fmt = (n: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
 
 const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -37,6 +37,7 @@ export default function DashboardPage({ bills, onNavigate, onLogout }: Props) {
   const paid = bills.filter(b => b.status === 'Paid').length
   const overdue = bills.filter(b => b.status === 'Overdue').length
   const revenue = bills.filter(b => b.status === 'Paid').reduce((s, b) => s + b.amount, 0)
+  const outstanding = bills.filter(b => b.status !== 'Paid').reduce((s, b) => s + b.amount, 0)
 
   const stats = [
     {
@@ -79,7 +80,7 @@ export default function DashboardPage({ bills, onNavigate, onLogout }: Props) {
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              Welcome back, Jane. Here's what's happening today.
+              Your workspace is ready. Add your first bill or customer to start tracking activity.
             </p>
           </div>
           <button
@@ -139,7 +140,7 @@ export default function DashboardPage({ bills, onNavigate, onLogout }: Props) {
                   tick={{ fontSize: 12, fill: '#94A3B8' }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
+                  tickFormatter={v => `₹${(v / 1000).toFixed(0)}k`}
                   width={44}
                 />
                 <Tooltip
@@ -193,9 +194,7 @@ export default function DashboardPage({ bills, onNavigate, onLogout }: Props) {
 
             <div className="mt-6 pt-5 border-t border-slate-100">
               <p className="text-xs text-slate-400 mb-1">Total outstanding</p>
-              <p className="text-xl font-bold text-slate-900">
-                {fmt(bills.filter(b => b.status !== 'Paid').reduce((s, b) => s + b.amount, 0))}
-              </p>
+              <p className="text-xl font-bold text-slate-900">{fmt(outstanding)}</p>
             </div>
           </div>
         </div>

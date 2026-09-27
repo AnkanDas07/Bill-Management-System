@@ -8,6 +8,7 @@ interface Props {
   customers: Customer[]
   onAddBill: (bill: Bill) => void
   onDeleteBill: (id: string) => void
+  onUpdateBillStatus: (id: string, status: Bill['status']) => void
   onNavigate: (page: Page) => void
   onLogout: () => void
 }
@@ -26,7 +27,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 const fmt = (n: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
 
 const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -43,11 +44,12 @@ interface FormState {
   items: LineItem[]
 }
 
-export default function BillsPage({ bills, customers, onAddBill, onDeleteBill, onNavigate, onLogout }: Props) {
+export default function BillsPage({ bills, customers, onAddBill, onDeleteBill, onUpdateBillStatus, onNavigate, onLogout }: Props) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<BillStatus | 'All'>('All')
   const [showModal, setShowModal] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [editingStatusId, setEditingStatusId] = useState<string | null>(null)
 
   const nextInvoice = `INV-${String(bills.length + 1).padStart(3, '0')}`
   const today = new Date().toISOString().split('T')[0]
@@ -189,29 +191,54 @@ export default function BillsPage({ bills, customers, onAddBill, onDeleteBill, o
                       <td className="px-5 py-3.5 text-sm font-semibold text-slate-900 tabular-nums">{fmt(b.amount)}</td>
                       <td className="px-5 py-3.5"><StatusBadge status={b.status} /></td>
                       <td className="px-5 py-3.5">
-                        {deleteConfirm === b.id ? (
+                        {editingStatusId === b.id ? (
                           <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => { onDeleteBill(b.id); setDeleteConfirm(null) }}
-                              className="text-xs font-medium text-red-600 hover:text-red-700 px-2 py-1 rounded bg-red-50 hover:bg-red-100 transition-colors"
+                            <select
+                              value={b.status}
+                              onChange={(e) => {
+                                onUpdateBillStatus(b.id, e.target.value as Bill['status'])
+                                setEditingStatusId(null)
+                              }}
+                              className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             >
-                              Confirm
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm(null)}
-                              className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
-                            >
-                              Cancel
-                            </button>
+                              <option value="Paid">Paid</option>
+                              <option value="Pending">Pending</option>
+                              <option value="Overdue">Overdue</option>
+                            </select>
                           </div>
                         ) : (
-                          <button
-                            onClick={() => setDeleteConfirm(b.id)}
-                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete bill"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setEditingStatusId(b.id)}
+                              className="text-xs font-medium text-blue-600 hover:text-blue-700 px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors"
+                            >
+                              Edit Status
+                            </button>
+                            {deleteConfirm === b.id ? (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => { onDeleteBill(b.id); setDeleteConfirm(null) }}
+                                  className="text-xs font-medium text-red-600 hover:text-red-700 px-2 py-1 rounded bg-red-50 hover:bg-red-100 transition-colors"
+                                >
+                                  Confirm
+                                </button>
+                                <button
+                                  onClick={() => setDeleteConfirm(null)}
+                                  className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setDeleteConfirm(b.id)}
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete bill"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            )}
+                          </div>
                         )}
                       </td>
                     </tr>

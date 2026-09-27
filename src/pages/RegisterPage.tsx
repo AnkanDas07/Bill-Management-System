@@ -4,9 +4,16 @@ import type { Page } from '../types'
 
 interface RegisterPageProps {
   onNavigate: (page: Page) => void
+  onRegister: (input: {
+    fullName: string
+    companyName: string
+    email: string
+    phone: string
+    password: string
+  }) => void
 }
 
-export default function RegisterPage({ onNavigate }: RegisterPageProps) {
+export default function RegisterPage({ onNavigate, onRegister }: RegisterPageProps) {
   const [form, setForm] = useState({
     fullName: '',
     companyName: '',
@@ -40,25 +47,39 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
     return errs
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
-    onNavigate('login')
+
+    try {
+      await onRegister({
+        fullName: form.fullName.trim(),
+        companyName: form.companyName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        password: form.password,
+      })
+      onNavigate('login')
+    } catch (error) {
+      setErrors({
+        email: error instanceof Error ? error.message : 'Unable to create account.',
+      })
+    }
   }
 
   const inputClass = (field: string) =>
     `w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all ${
       errors[field]
         ? 'border-red-400 ring-2 ring-red-100'
-        : 'border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+        : 'border-slate-200 focus:border-[#2f6f7b] focus:ring-2 focus:ring-[#dfeef1]'
     }`
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-lg">
         <div className="flex items-center justify-center gap-2 mb-6">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#2f6f7b] rounded-lg flex items-center justify-center">
             <Zap size={16} className="text-white" />
           </div>
           <span className="text-xl font-bold text-slate-900">BillFlow</span>
@@ -169,13 +190,13 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
                   type="checkbox"
                   checked={form.agreeTerms}
                   onChange={e => set('agreeTerms', e.target.checked)}
-                  className="w-4 h-4 mt-0.5 rounded border-slate-300 accent-blue-600 cursor-pointer flex-shrink-0"
+                  className="w-4 h-4 mt-0.5 rounded border-slate-300 accent-[#2f6f7b] cursor-pointer flex-shrink-0"
                 />
                 <span className="text-sm text-slate-600">
                   I agree to the{' '}
-                  <button type="button" className="text-blue-600 hover:text-blue-700 font-medium">Terms & Conditions</button>
+                  <button type="button" className="text-[#2f6f7b] hover:text-[#214f5b] font-medium">Terms & Conditions</button>
                   {' '}and{' '}
-                  <button type="button" className="text-blue-600 hover:text-blue-700 font-medium">Privacy Policy</button>
+                  <button type="button" className="text-[#2f6f7b] hover:text-[#214f5b] font-medium">Privacy Policy</button>
                 </span>
               </label>
               {errors.agreeTerms && <p className="mt-1 text-xs text-red-500">{errors.agreeTerms}</p>}
@@ -183,7 +204,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-colors mt-2"
+              className="w-full bg-[#2f6f7b] text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#214f5b] active:bg-[#173d4d] transition-colors mt-2"
             >
               Create Account
             </button>
@@ -194,7 +215,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
           Already have an account?{' '}
           <button
             onClick={() => onNavigate('login')}
-            className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+            className="text-[#2f6f7b] hover:text-[#214f5b] font-semibold transition-colors"
           >
             Sign in
           </button>

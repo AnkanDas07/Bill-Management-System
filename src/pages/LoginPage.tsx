@@ -3,7 +3,7 @@ import { Eye, EyeOff, Zap, CheckCircle2, TrendingUp, Shield } from 'lucide-react
 import type { Page } from '../types'
 
 interface LoginPageProps {
-  onLogin: () => void
+  onLogin: (email: string, password: string) => void
   onNavigate: (page: Page) => void
 }
 
@@ -12,7 +12,7 @@ export default function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({})
 
   const validate = () => {
     const errs: typeof errors = {}
@@ -22,11 +22,16 @@ export default function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
     return errs
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
-    onLogin()
+
+    try {
+      await onLogin(email, password)
+    } catch (error) {
+      setErrors({ form: error instanceof Error ? error.message : 'Invalid email or password.' })
+    }
   }
 
   return (
@@ -35,7 +40,7 @@ export default function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
         <div className="w-full max-w-sm">
           <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-[#2f6f7b] rounded-lg flex items-center justify-center">
               <Zap size={16} className="text-white" />
             </div>
             <span className="text-xl font-bold text-slate-900">BillFlow</span>
@@ -57,7 +62,7 @@ export default function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
                 className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all ${
                   errors.email
                     ? 'border-red-400 ring-2 ring-red-100'
-                    : 'border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                    : 'border-slate-200 focus:border-[#2f6f7b] focus:ring-2 focus:ring-[#dfeef1]'
                 }`}
               />
               {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
@@ -76,7 +81,7 @@ export default function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
                   className={`w-full px-3.5 py-2.5 pr-10 rounded-lg border text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all ${
                     errors.password
                       ? 'border-red-400 ring-2 ring-red-100'
-                      : 'border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                      : 'border-slate-200 focus:border-[#2f6f7b] focus:ring-2 focus:ring-[#dfeef1]'
                   }`}
                 />
                 <button
@@ -88,6 +93,7 @@ export default function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
                 </button>
               </div>
               {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+              {errors.form && <p className="mt-2 text-xs text-red-500">{errors.form}</p>}
             </div>
 
             <div className="flex items-center justify-between">
@@ -96,18 +102,18 @@ export default function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={e => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-blue-600 accent-blue-600 cursor-pointer"
+                  className="w-4 h-4 rounded border-slate-300 text-[#2f6f7b] accent-[#2f6f7b] cursor-pointer"
                 />
                 <span className="text-sm text-slate-600">Remember me</span>
               </label>
-              <button type="button" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+              <button type="button" className="text-sm text-[#2f6f7b] hover:text-[#214f5b] font-medium transition-colors">
                 Forgot password?
               </button>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-colors mt-2"
+              className="w-full bg-[#2f6f7b] text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#214f5b] active:bg-[#173d4d] transition-colors mt-2"
             >
               Sign in
             </button>
@@ -117,20 +123,17 @@ export default function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
             Don't have an account?{' '}
             <button
               onClick={() => onNavigate('register')}
-              className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+              className="text-[#2f6f7b] hover:text-[#214f5b] font-semibold transition-colors"
             >
               Create account
             </button>
           </p>
 
-          <p className="mt-8 text-center text-xs text-slate-400">
-            Demo: use any email & password to sign in
-          </p>
         </div>
       </div>
 
       {/* Right — Brand panel */}
-      <div className="hidden lg:flex flex-1 relative bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500 flex-col items-center justify-center p-12 overflow-hidden">
+      <div className="hidden lg:flex flex-1 relative bg-gradient-to-br from-[#173d4d] via-[#214f5b] to-[#2f6f7b] flex-col items-center justify-center p-12 overflow-hidden">
         {/* Decorative circles */}
         <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/5" />
         <div className="absolute top-1/3 -left-16 w-56 h-56 rounded-full bg-white/5" />

@@ -1,8 +1,25 @@
+:root {
+  --brand-50: #eef7f9;
+  --brand-100: #dfeef3;
+  --brand-500: #2f6f7b;
+  --brand-600: #214f5b;
+  --brand-700: #173d4d;
+  --navy-900: #122833;
+  --navy-800: #1b2d39;
+  --bg-soft: #f4f7f9;
+  --surface: #ffffff;
+  --border: #dfe7ee;
+  --text: #14252f;
+  --text-soft: #4b5d68;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
 @import 'tailwindcss';
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(180deg, #f4f7f9 0%, #edf3f5 100%);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -15,9 +32,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #cbd9df;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #9bb0b8;
 }
