@@ -17,11 +17,70 @@ const client = new Client({
 
 const ensureSchema = async () => {
   try {
+    const billTypeExists = await client.query(
+      "SELECT 1 FROM pg_type WHERE typname = 'bill_status'"
+    )
+    if (billTypeExists.rowCount === 0) {
+      await client.query("CREATE TYPE bill_status AS ENUM ('Paid', 'Pending', 'Overdue')")
+    }
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        role VARCHAR(30) NOT NULL DEFAULT 'admin',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `)
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS customers (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        name VARCHAR(150) NOT NULL,
+        email VARCHAR(255),
+        phone VARCHAR(50),
+        total_bills INTEGER NOT NULL DEFAULT 0,
+        total_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE (user_id, name),
+        UNIQUE (user_id, email)
+      )
+    `)
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS bills (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        invoice_number VARCHAR(50) NOT NULL,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+        customer_name VARCHAR(150) NOT NULL,
+        bill_date DATE NOT NULL,
+        amount NUMERIC(12,2) NOT NULL DEFAULT 0,
+        status bill_status NOT NULL DEFAULT 'Pending',
+        notes TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE (user_id, invoice_number)
+      )
+    `)
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS bill_items (
+        id SERIAL PRIMARY KEY,
+        bill_id INTEGER NOT NULL REFERENCES bills(id) ON DELETE CASCADE,
+        description TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+        price NUMERIC(12,2) NOT NULL DEFAULT 0,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `)
+
     const columns = await client.query(
       "SELECT column_name FROM information_schema.columns WHERE table_name = 'users'"
     )
     const userColumns = new Set(columns.rows.map((row) => row.column_name))
-
     if (!userColumns.has('role')) {
       await client.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(30) NOT NULL DEFAULT 'admin'")
     }
@@ -59,6 +118,12 @@ const ensureSchema = async () => {
       await client.query("UPDATE bills SET user_id = NULL WHERE user_id IS NOT NULL AND user_id::text !~ '^[0-9]+$'")
       await client.query("ALTER TABLE bills ALTER COLUMN user_id TYPE INTEGER USING NULLIF(user_id::text, '')::INTEGER")
     }
+
+    await client.query("CREATE INDEX IF NOT EXISTS idx_bills_user_id ON bills(user_id)")
+    await client.query("CREATE INDEX IF NOT EXISTS idx_bills_customer_id ON bills(customer_id)")
+    await client.query("CREATE INDEX IF NOT EXISTS idx_bills_status ON bills(status)")
+    await client.query("CREATE INDEX IF NOT EXISTS idx_customers_user_id ON customers(user_id)")
+    await client.query("CREATE INDEX IF NOT EXISTS idx_customers_name ON customers(name)")
 
     console.log('Database schema check complete.')
   } catch (error) {
@@ -298,6 +363,10 @@ app.get('/api/health', (_req, res) => {
   res.status(200).json({ status: 'ok' })
 })
 
-app.listen(port, () => {
-  console.log(`BillFlow server running on http://localhost:${port}`)
-})
+module.exports = { app, client }
+
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`BillFlow server running on http://localhost:${port}`)
+  })
+}

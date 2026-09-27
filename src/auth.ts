@@ -8,10 +8,27 @@ export interface UserAccount {
 
 export const CURRENT_USER_STORAGE_KEY = 'billflow_current_user'
 
-const API_BASE = 'http://localhost:5000/api'
+const FALLBACK_API_BASE = 'http://localhost:5000/api'
+const API_BASE = (import.meta.env.VITE_API_BASE || '/api').replace(/\/$/, '')
+
+const getApiBaseCandidates = () => [API_BASE, FALLBACK_API_BASE].filter((value, index, arr) => value && arr.indexOf(value) === index)
+
+const fetchWithFallback = async (endpoint: string, init: RequestInit): Promise<Response> => {
+  let lastError: unknown
+
+  for (const base of getApiBaseCandidates()) {
+    try {
+      return await fetch(`${base}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`, init)
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('Unable to reach the authentication service.')
+}
 
 const apiRequest = async <T>(endpoint: string, body: Record<string, unknown>): Promise<T> => {
-  const response = await fetch(`${API_BASE}${endpoint}`, {
+  const response = await fetchWithFallback(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

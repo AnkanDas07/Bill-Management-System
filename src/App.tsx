@@ -7,8 +7,27 @@ import DashboardPage from './pages/DashboardPage'
 import BillsPage from './pages/BillsPage'
 import CustomersPage from './pages/CustomersPage'
 
+const FALLBACK_API_BASE = 'http://localhost:5000/api'
+const API_BASE = (import.meta.env.VITE_API_BASE || '/api').replace(/\/$/, '')
+
+const getApiBaseCandidates = () => [API_BASE, FALLBACK_API_BASE].filter((value, index, arr) => value && arr.indexOf(value) === index)
+
+async function fetchWithFallback(urlPath: string, init: RequestInit): Promise<Response> {
+  let lastError: unknown
+
+  for (const base of getApiBaseCandidates()) {
+    try {
+      return await fetch(`${base}${urlPath.startsWith('/') ? urlPath : `/${urlPath}`}`, init)
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('Unable to reach the BillFlow API.')
+}
+
 async function makeUserScopedRequest<T>(endpoint: string, body: Record<string, unknown>, userId: string | null): Promise<T> {
-  const response = await fetch(`http://localhost:5000/api${endpoint}`, {
+  const response = await fetchWithFallback(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -64,14 +83,14 @@ export default function App() {
 
     try {
       const [billResponse, customerResponse] = await Promise.all([
-        fetch(`http://localhost:5000/api/bills`, {
+        fetchWithFallback('/bills', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'x-user-id': userId,
           },
         }),
-        fetch(`http://localhost:5000/api/customers`, {
+        fetchWithFallback('/customers', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -149,7 +168,7 @@ export default function App() {
     const userId = storedUser?.id ?? null
     if (userId) {
       try {
-        await fetch(`http://localhost:5000/api/bills/${id}/status`, {
+        await fetchWithFallback(`/bills/${id}/status`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
