@@ -58,7 +58,7 @@ export default function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
                 type="email"
                 value={email}
                 onChange={e => { setEmail(e.target.value); setErrors(p => ({ ...p, email: undefined })) }}
-                placeholder="you@company.com"
+                placeholder="enter your email"
                 className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all ${
                   errors.email
                     ? 'border-red-400 ring-2 ring-red-100'

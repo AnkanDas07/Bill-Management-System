@@ -74,7 +74,7 @@ cd Bill-Management-System
 2. Install frontend dependencies:
 
 ```bash
-pnpm install
+npm install
 ```
 
 3. Install backend dependencies in the database server folder:

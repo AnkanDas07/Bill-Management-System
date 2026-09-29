@@ -282,7 +282,7 @@ export default function BillsPage({ bills, customers, onAddBill, onDeleteBill, o
                     type="text"
                     value={form.customerName}
                     onChange={e => { setForm(p => ({ ...p, customerName: e.target.value })); setFormErrors(p => ({ ...p, customerName: '' })) }}
-                    placeholder="e.g. Acme Corporation"
+                    placeholder="Customer name"
                     list="customer-list"
                     className={`w-full px-3.5 py-2.5 rounded-lg border text-sm outline-none transition-all ${formErrors.customerName ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'}`}
                   />
@@ -353,7 +353,7 @@ export default function BillsPage({ bills, customers, onAddBill, onDeleteBill, o
                       <input
                         type="number"
                         min={0}
-                        step={0.01}
+                        step={1000}
                         className="col-span-3 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
                         placeholder="0.00"
                         value={item.price || ''}

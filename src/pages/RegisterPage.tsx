@@ -99,7 +99,7 @@ export default function RegisterPage({ onNavigate, onRegister }: RegisterPagePro
                   type="text"
                   value={form.fullName}
                   onChange={e => set('fullName', e.target.value)}
-                  placeholder="Jane Davis"
+                  placeholder="Full name"
                   className={inputClass('fullName')}
                 />
                 {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>}
@@ -110,7 +110,7 @@ export default function RegisterPage({ onNavigate, onRegister }: RegisterPagePro
                   type="text"
                   value={form.companyName}
                   onChange={e => set('companyName', e.target.value)}
-                  placeholder="Acme Corp"
+                  placeholder="Company name"
                   className={inputClass('companyName')}
                 />
                 {errors.companyName && <p className="mt-1 text-xs text-red-500">{errors.companyName}</p>}
@@ -123,7 +123,7 @@ export default function RegisterPage({ onNavigate, onRegister }: RegisterPagePro
                 type="email"
                 value={form.email}
                 onChange={e => set('email', e.target.value)}
-                placeholder="you@company.com"
+                placeholder="enter your email"
                 className={inputClass('email')}
               />
               {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
@@ -135,7 +135,7 @@ export default function RegisterPage({ onNavigate, onRegister }: RegisterPagePro
                 type="tel"
                 value={form.phone}
                 onChange={e => set('phone', e.target.value)}
-                placeholder="+1 (555) 000-0000"
+                placeholder="Mobile number"
                 className={inputClass('phone')}
               />
               {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
